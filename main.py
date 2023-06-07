@@ -63,13 +63,14 @@ class ChainingHashTable:
 
 
 class Package:
-    def __init__(self, ID, address, city, zipcode, deadline, weight, status):
+    def __init__(self, ID, address, city, zipcode, deadline, weight, notes, status):
         self.ID = ID
         self.address = address
         self.city = city
         self.zipcode = zipcode
         self.deadline = deadline
         self.weight = weight
+        self.notes = notes
         self.status = status
 
     def __str__(self):  # Overwrite
@@ -89,10 +90,11 @@ def load_package_data(file_name):
             p_zipcode = package[4]
             p_deadline = package[5]
             p_weight = package[6]
+            p_notes = package[7]
             p_status = "delivered"
 
-            # Create the movie object
-            package = Package(p_id, p_address, p_city, p_zipcode, p_deadline, p_weight, p_status)
+            # Create the package object
+            package = Package(p_id, p_address, p_city, p_zipcode, p_deadline, p_weight, p_notes, p_status)
 
             # insert package data into hash table
             myHash.insert(p_id, package)
@@ -103,13 +105,22 @@ myHash = ChainingHashTable()
 
 load_package_data('WGUPSPackageFile.csv')
 
-class distanceDataList:
-    # define list for storing distance information
-    distance_data = [][]
-    #Load data into list from excel file
-    def load_distance_data(file_name):
+
+class DistanceDataDict:
+    # def __int__(self, row, col):
+    # self.row = row
+    # self.col = col
+
+    # define dictionary for storing distance information
+    distance_data = {}
+
+    # Load data into list from excel file
+    def load_distance_data(self):
+        with open('distanceTable.csv', 'r') as distanceTable:
+            distance_data = csv.DictReader(distanceTable)
+            list_of_distance = list(distance_data)
+            print(list_of_distance)
     # Read data from CSV file row by row
     # Append data to distance_data list
 
 # Create Address data class - load data from CSV file and append to list
-
