@@ -1,4 +1,5 @@
 # Jennifer Murphy
+# Student ID: 001532028
 # Reference: zyBooks: Figure 7.8.2: Hash table using chaining
 # Reference: zyBooks: Figure 3.3.1: MakeChange greedy algorithm
 
@@ -63,8 +64,8 @@ class ChainingHashTable:
 
 
 class Package:
-    def __init__(self, ID, address, city, zipcode, deadline, weight, notes, status):
-        self.ID = ID
+    def __init__(self, id, address, city, zipcode, deadline, weight, notes, status):
+        self.id = id
         self.address = address
         self.city = city
         self.zipcode = zipcode
@@ -74,7 +75,7 @@ class Package:
         self.status = status
 
     def __str__(self):  # Overwrite
-        return "%s, %s, %s, %s, %s, %s, %s" % (self.ID, self.address, self.city, self.zipcode,
+        return "%s, %s, %s, %s, %s, %s, %s" % (self.id, self.address, self.city, self.zipcode,
                                                self.deadline, self.weight, self.status)
 
 
@@ -106,21 +107,34 @@ myHash = ChainingHashTable()
 load_package_data('WGUPSPackageFile.csv')
 
 
-class DistanceDataDict:
-    # def __int__(self, row, col):
-    # self.row = row
-    # self.col = col
-
-    # define dictionary for storing distance information
-    distance_data = {}
+class Distances:
+    def __init__(self, row):
+        self.row = row
 
     # Load data into list from excel file
-    def load_distance_data(self):
-        with open('distanceTable.csv', 'r') as distanceTable:
-            distance_data = csv.DictReader(distanceTable)
-            list_of_distance = list(distance_data)
-            print(list_of_distance)
-    # Read data from CSV file row by row
-    # Append data to distance_data list
+    def load_distance_data(file_name):
+        with open(file_name) as distancesOnly:
+            distance_data = csv.reader(distancesOnly, delimiter=',')
+            # define dictionary for storing distance information
+            distances = []
+            # Append distance row by row to distances list
+            for row in distance_data:
+                distances.append(row)
 
-# Create Address data class - load data from CSV file and append to list
+
+# Create Address class - get addresses from file and create key value pairs in dict mapping strings to integer indices.
+class Address:
+     def address_dict(file_name):
+        with open(file_name) as distanceTable:
+            address_data = csv.reader(distanceTable)
+            headers = next(address_data)  # read the addresses from headers
+
+            address_dict = {}
+            index = 0
+            # iterate through addresses and assign to an index value
+            for address in headers:
+                address_dict[address] = index
+                index += 1
+
+        return address_dict
+
