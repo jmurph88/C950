@@ -2,7 +2,7 @@
 # Student ID: 001532028
 # Reference: zyBooks: Figure 7.8.2: Hash table using chaining
 # Reference: zyBooks: Figure 3.3.1: MakeChange greedy algorithm
-# https://github.com/FallicoFunctions/Python-Mail-Delivery-Service-Algorithm_WGU-C950 - Remove this before submittal!!!!
+
 import csv
 
 # Read file with distances
@@ -14,6 +14,10 @@ with open('distanceCSV.csv') as csvfile:
 with open('addressCSV.csv') as csvfile1:
     Address_Only = csv.reader(csvfile1)
     Address_Only = list(Address_Only)
+
+with open('packageCSV.csv') as csvfile2:
+    Package_File = csv.reader(csvfile2)
+    Package_File = list(Package_File)
 
 
 # HashTable class using chaining.
@@ -75,10 +79,11 @@ class ChainingHashTable:
 
 # Create package object
 class Package:
-    def __init__(self, package_id, address, city, zipcode, deadline, weight, notes, status):
-        self.package_id = package_id
+    def __init__(self, p_id, address, city, state, zipcode, deadline, weight, notes, status):
+        self.p_id = p_id
         self.address = address
         self.city = city
+        self.state = state
         self.zipcode = zipcode
         self.deadline = deadline
         self.weight = weight
@@ -86,7 +91,7 @@ class Package:
         self.status = status
 
     def __str__(self):  # Overwrite
-        return "%s, %s, %s, %s, %s, %s, %s" % (self.package_id, self.address, self.city, self.zipcode,
+        return "%s, %s, %s, %s, %s, %s, %s" % (self.p_id, self.address, self.city, self.zipcode,
                                                self.deadline, self.weight, self.status)
 
 
@@ -106,35 +111,30 @@ class Truck:
 
 
 # Load pacakge data from csv file into hash table
-def load_package_data(file_name):
+def load_package_data(file_name, my_hash_table):
     # Read package from the CSV file
-    with open(file_name) as WGUPSPackageFile:
-        package_data = csv.reader(WGUPSPackageFile, delimiter=',')
+    with open(file_name) as package_file:
+        package_data = csv.reader(package_file, delimiter=',')
         next(package_data)  # skips header
         for package in package_data:
             p_id = int(package[0])
             p_address = package[1]
             p_city = package[2]
+            p_state = package[3]
             p_zipcode = package[4]
             p_deadline = package[5]
             p_weight = package[6]
             p_notes = package[7]
-            p_status = "delivered"
+            p_status = "At Hub"
 
             # Create the package object
-            package = Package(p_id, p_address, p_city, p_zipcode, p_deadline, p_weight, p_notes, p_status)
+            package_obj = Package(p_id, p_address, p_city, p_state, p_zipcode, p_deadline, p_weight, p_notes, p_status)
 
             # insert package data into hash table using key and value (package)
-            myHash.insert(p_id, package)
+            my_hash_table.insert(p_id, package_obj)
 
 
-# Create instance of hash table to load data
-myHash = ChainingHashTable()
-
-load_package_data('packageCSV.csv')
-
-
-# Find the distance between two addresses
+# Find the distance between two addresses and returns it as a float
 def distance_between(row_index, column_index):
     distance = Distance_Only[row_index][column_index]
     if distance == '':
@@ -143,6 +143,15 @@ def distance_between(row_index, column_index):
     return float(distance)
 
 
+# Search for address in addressCSV file using list created when reading CSV file
+# and get address number from string
+def find_address(address):
+    for row in Address_Only:
+        if address in row[2]:
+            return int(row[0])
+
+
+# Create truck objects and assign packages
 truck1 = Truck(
     capacity=16,
     speed=18,
@@ -156,7 +165,7 @@ truck2 = Truck(
     capacity=16,
     speed=18,
     load=0,
-    packages=[3, 4, 5, 9, 18, 36, 38],  # loads packages based on ID
+    packages=[3, 4, 5, 9, 18, 36, 38],  # loads packages based on ID - Package with address change goes here
     mileage=0.0,
     address="4001 South 700 East",  # All start at the HUB
     departure="10:20 AM"
@@ -172,27 +181,35 @@ truck3 = Truck(
     departure="9:05 AM"
 )
 
-# Function to provide float distance between two addresses
+# Create instance of hash table to load data
+hash_table = ChainingHashTable()
+
+# Load package data into hash table
+load_package_data('packageCSV.csv', hash_table)
+
 
 # Nearest neighbor algorithm to load the trucks based on addresses
-def deliver_packages(truck):
-    # All packages at the Hub are placed in an array.
-    at_hub = []
-    # Any package that is at the hub is added to the array
-    for package_id in truck.package:
-        package = myHash.search(package_id)
-        at_hub.append(package)
+def nearest_neighbor(truck):
+    # All packages that have not been delivered yet in array.
+    not_delivered = []
+    # Any package that is not delivered is added to the array -Is this my problem?
+    for package_id in truck.packages:
+        package = hash_table.search(package_id)
+        not_delivered.append(package)
     # Clear list so packages can be placed in order of closest address(nearest neighbor)
-    truck.pacakges.clear()
+    truck.packages.clear()
 
-    while len(at_hub) > 0:
+    # While the not delivered list is not empty
+    while len(not_delivered) > 0:
         next_address = float('inf')  # initialized with large value for address
         next_package = None
 
-        # Iterate over packages that are still at hub and not delivered yet
-        for package in at_hub:
+        # Iterate over packages that are still at hub and not delivered yet and add to trucks by
+        # nearest address.
+        for package in not_delivered:
             # Calculates distance between truck's current location and package's address
-            current_package_distance = distance_between(truck.address, package.address)
+            current_package_distance = distance_between(find_address(truck.address),
+                                                        find_address(package.address))
             # Determine if current package is closer than the next package in line and update next_address and
             # next_package
             if current_package_distance <= next_address:
@@ -200,6 +217,23 @@ def deliver_packages(truck):
                 next_package = package
         # Add the next closest package to the truck's list of packages
         truck.packages.append(next_package.package_id)
-        # Remove this package from the list of packages at the hub
-        at_hub.remove(next_package)
-    # How to track milage?
+        # Remove this package from the list of not delivered packages
+        not_delivered.remove(next_package)
+        # Add the distance to the next package's address to the truck's mileage
+        truck.mileage += next_address
+        # Update truck's address to the current package's address to allow comparison.
+        truck.address = next_package.address
+
+
+# Load the trucks for delivery of packages
+nearest_neighbor(truck1)
+nearest_neighbor(truck2)
+
+
+# Need to make sure truck 3 does not leave until these two trucks are finished -
+# only two drivers available
+#nearest_neighbor(truck3)
+
+class Main:
+    print("The route mileage is: ")
+    print(truck1.mileage + truck2.mileage + truck3.mileage)
