@@ -6,17 +6,17 @@
 import csv
 
 # Read file with distances
-with open('distanceCSV.csv') as csvfile:
-    Distance_Only = csv.reader(csvfile)
+with open('distanceCSV.csv') as csvfile1:
+    Distance_Only = csv.reader(csvfile1)
     Distance_Only = list(Distance_Only)
 
 # Read file with address information
-with open('addressCSV.csv') as csvfile1:
-    Address_Only = csv.reader(csvfile1)
+with open('addressCSV.csv') as csvfile2:
+    Address_Only = csv.reader(csvfile2)
     Address_Only = list(Address_Only)
 
-with open('packageCSV.csv') as csvfile2:
-    Package_File = csv.reader(csvfile2)
+with open('packageCSV.csv') as csvfile3:
+    Package_File = csv.reader(csvfile3)
     Package_File = list(Package_File)
 
 
@@ -33,7 +33,7 @@ class ChainingHashTable:
     # Inserts a new item into the hash table.
     def insert(self, key, item):
         # calculate the bucket where the item will be inserted - hash formula.
-        bucket = hash(item) % len(self.table)
+        bucket = hash(key) % len(self.table)
         # creating the list that will be inside each bucket.
         bucket_list = self.table[bucket]
 
@@ -73,14 +73,17 @@ class ChainingHashTable:
         bucket_list = self.table[bucket]
 
         # remove the item from the bucket list if it is present.
-        if key in bucket_list:
-            bucket_list.remove(key)
+        for key_value in bucket_list:
+            if key_value[0] == key:
+                bucket_list.remove(key_value)
+                return True
+        return False
 
 
 # Create package object
 class Package:
-    def __init__(self, p_id, address, city, state, zipcode, deadline, weight, notes, status):
-        self.p_id = p_id
+    def __init__(self, package_id, address, city, state, zipcode, deadline, weight, notes, status):
+        self.package_id = package_id
         self.address = address
         self.city = city
         self.state = state
@@ -91,8 +94,10 @@ class Package:
         self.status = status
 
     def __str__(self):  # Overwrite
-        return "%s, %s, %s, %s, %s, %s, %s" % (self.p_id, self.address, self.city, self.zipcode,
+        return "%s, %s, %s, %s, %s, %s, %s" % (self.package_id, self.address, self.city, self.zipcode,
                                                self.deadline, self.weight, self.status)
+
+    def status_update(self):
 
 
 class Truck:
@@ -115,7 +120,6 @@ def load_package_data(file_name, my_hash_table):
     # Read package from the CSV file
     with open(file_name) as package_file:
         package_data = csv.reader(package_file, delimiter=',')
-        next(package_data)  # skips header
         for package in package_data:
             p_id = int(package[0])
             p_address = package[1]
@@ -134,21 +138,21 @@ def load_package_data(file_name, my_hash_table):
             my_hash_table.insert(p_id, package_obj)
 
 
-# Find the distance between two addresses and returns it as a float
-def distance_between(row_index, column_index):
-    distance = Distance_Only[row_index][column_index]
-    if distance == '':
-        distance = Distance_Only[row_index][column_index]
-
-    return float(distance)
-
-
 # Search for address in addressCSV file using list created when reading CSV file
-# and get address number from string
+# and get package id to use when searching for distances between packages.
 def find_address(address):
     for row in Address_Only:
         if address in row[2]:
             return int(row[0])
+
+
+# Find the distance between two addresses and returns it as a float
+def distance_between(row_index, column_index):
+    if row_index < column_index:
+        # switch row and column if row is smaller
+        row_index, column_index = column_index, row_index
+    distance = Distance_Only[row_index][column_index]
+    return float(distance)
 
 
 # Create truck objects and assign packages
@@ -188,7 +192,7 @@ hash_table = ChainingHashTable()
 load_package_data('packageCSV.csv', hash_table)
 
 
-# Nearest neighbor algorithm to load the trucks based on addresses
+# Nearest neighbor algorithm to load the trucks based on addresses O(n^2)
 def nearest_neighbor(truck):
     # All packages that have not been delivered yet in array.
     not_delivered = []
@@ -223,7 +227,9 @@ def nearest_neighbor(truck):
         truck.mileage += next_address
         # Update truck's address to the current package's address to allow comparison.
         truck.address = next_package.address
-
+        # Update truck time? Need to make a function???
+        #time_to_deliver(h) = distance(miles)/18
+        #time_obj =datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
 
 # Load the trucks for delivery of packages
 nearest_neighbor(truck1)
@@ -232,7 +238,7 @@ nearest_neighbor(truck2)
 
 # Need to make sure truck 3 does not leave until these two trucks are finished -
 # only two drivers available
-#nearest_neighbor(truck3)
+# nearest_neighbor(truck3)
 
 class Main:
     print("The route mileage is: ")
