@@ -79,17 +79,21 @@ class Package:
         self.delivery_time = None
 
     def __str__(self):  # Overwrite
-        return "%s, %s, %s, %s, %s, %s, %s" % (self.package_id, self.address, self.city, self.zipcode,
-                                               self.deadline, self.weight, self.status)
+        if self.status == "Delivered" and self.delivery_time:
+            return "%s, %s, %s, %s, %s, %s, %s, %s" % (self.package_id, self.address, self.city, self.zipcode,
+                                                       self.deadline, self.weight, self.status, self.delivery_time)
+        else:
+            return "%s, %s, %s, %s, %s, %s, %s" % (self.package_id, self.address, self.city, self.zipcode,
+                                                   self.deadline, self.weight, self.status)
 
     # Updates the status of the package using the truck.time compared to the user input time.
     def update_status(self, user_time):
-        if self.loaded_time > user_time:
-            self.status = "En Route"
-        elif self.delivery_time < user_time:
-            self.status = "Delivered"
-        else:
-            self.status = "At Hub"
+        if self.status == "AtHub" and self.loaded_time is not None:
+            if self.delivery_time <= user_time:
+                self.status = "En Route"
+        elif self.status == "En Route" and self.delivery_time is not None:
+            if self.delivery_time >= user_time:
+                self.status = "Delivered"
 
 
 class Truck:
@@ -107,5 +111,3 @@ class Truck:
     def __str__(self):  # overwrite
         return "%s, %s, %s,  %s, %s, %s, %s," % (self.capacity, self.speed, self.load, self.packages, self.mileage,
                                                  self.address, self.departure)
-
-

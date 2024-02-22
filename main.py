@@ -63,44 +63,6 @@ def distance_between(row_index, column_index):
     return float(distance)
 
 
-# Create truck objects and assign packages
-truck1 = Truck(
-    capacity=16,
-    speed=18,
-    load=0,
-    packages=[1, 2, 13, 14, 15, 16, 19, 20],  # loads packages based on ID
-    mileage=0.0,
-    address="4001 South 700 East",  # All start at the HUB
-    departure=datetime.timedelta(hours=8, minutes=0, seconds=0)
-)
-
-truck2 = Truck(
-    capacity=16,
-    speed=18,
-    load=0,
-    packages=[3, 4, 5, 9, 18, 36, 38],  # loads packages based on ID - Package with address change goes here
-    mileage=0.0,
-    address="4001 South 700 East",  # All start at the HUB
-    departure=datetime.timedelta(hours=10, minutes=20, seconds=0)
-)
-
-truck3 = Truck(
-    capacity=16,
-    speed=18,
-    load=0,
-    packages=[6, 7, 8, 25, 28, 32],  # loads packages based on ID
-    mileage=0.0,
-    address="4001 South 700 East",  # All start at the HUB
-    departure=datetime.timedelta(hours=9, minutes=5, seconds=0)
-)
-
-# Create instance of hash table to load data
-hash_table = ChainingHashTable()
-
-# Load package data into hash table
-load_package_data('packageCSV.csv', hash_table)
-
-
 # Nearest neighbor algorithm to load the trucks based on addresses O(n^2)
 def nearest_neighbor(truck):
     # All packages that have not been delivered yet in array.
@@ -145,6 +107,59 @@ def nearest_neighbor(truck):
         next_package.delivery_time = truck.time
 
 
+def convert_user_input(user_time):
+    try:
+        # split the input to separate the hours, minutes and seconds.
+        hours, minutes, seconds = map(int, user_time.split(':'))
+        # Check to make sure numbers entered are within time boundaries
+        if 0 <= hours <= 23 and 0 <= minutes <= 59 and 0 <= seconds <= 59:
+            # Convert the user time input into a datetime to be used to update pacakges
+            return datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
+        else:
+            raise ValueError("Invalid time format. Please enter a valid time in HH:MM:SS")
+    # Define Exception error message for invalid time entry
+    except ValueError as e:
+        raise ValueError("Invalid time format. Please enter a valid time in HH:MM:SS")
+
+
+# Create instance of hash table to load data
+hash_table = ChainingHashTable()
+
+# Load package data into hash table
+load_package_data('packageCSV.csv', hash_table)
+
+# Create truck objects and assign packages
+truck1 = Truck(
+    capacity=16,
+    speed=18,
+    load=0,
+    packages=[1, 4, 5, 13, 14, 15, 16, 19, 20, 29, 30, 31, 34, 37, 39, 40],  # loads packages based on ID
+    mileage=0.0,
+    address="4001 South 700 East",  # All start at the HUB
+    departure=datetime.timedelta(hours=8, minutes=0, seconds=0)
+)
+
+truck2 = Truck(
+    capacity=16,
+    speed=18,
+    load=0,
+    packages=[2, 3, 7, 8, 9, 10, 18, 22, 24, 26, 27, 33, 35, 36, 38],
+    # loads packages based on ID - Package with address change goes here
+    mileage=0.0,
+    address="4001 South 700 East",  # All start at the HUB
+    departure=datetime.timedelta(hours=10, minutes=20, seconds=0)
+)
+
+truck3 = Truck(
+    capacity=16,
+    speed=18,
+    load=0,
+    packages=[6, 7, 8, 11, 17, 19, 21, 23, 25, 28, 32],  # loads packages based on ID
+    mileage=0.0,
+    address="4001 South 700 East",  # All start at the HUB
+    departure=datetime.timedelta(hours=9, minutes=5, seconds=0)
+)
+
 # Load the trucks for delivery of packages
 nearest_neighbor(truck1)
 nearest_neighbor(truck2)
@@ -165,24 +180,45 @@ class Main:
     print("3 - Show the total mileage and the final status of all packages at end of day. ")
     print("4 - Exit the program")
 
-    user_input = int
-    # Need to add check that they actually enter a number
-    if user_input == 1:
-        user_time = input("Enter time in HH:MM:SS format:") #How to format user time input to datetime object??
-        user_package_id = int(input("Please enter the package ID: "))
-        user_package = hash_table.search(user_package_id)
-        user_package.upate_status(user_time)
-        print(str(user_package))
-    # User will be prompted to enter a time that will be used to update that status of all packages. All packages will
-    # be print to screen.
-    if user_input == 2:
-        user_time = input("Enter time in HH:MM:SS format:")
-        for package_id in range(1, 41):
-            package = hash_table.search(package_id)
-            package.update_status(user_time)
-            print(str(package))
+    while True:
+        user_input = input("Enter your choice: ")
 
-    if user_input == 4:
-        print("The route mileage is: ")
-        print(truck1.mileage + truck2.mileage + truck3.mileage)
-        print("Package ID, Address, City, State, Zipcode, Deadline, Weight (KILO), Notes, Status")
+        # Need to add check that they actually enter a number
+        if user_input == "1":
+            user_time = input("Enter time in HH:MM:SS format:")
+            # Format the user input into a datetime object using the convert_user_time function
+            user_time = convert_user_input(user_time)
+            user_package_id = int(input("Please enter the package ID: "))
+            user_package = hash_table.search(user_package_id)
+            user_package.update_status(user_time)
+            print(str(user_package))
+        # User will be prompted to enter a time that will be used to update that status of all packages. All packages
+        # will be print to screen.
+        elif user_input == "2":
+            user_time = input("Enter time in HH:MM:SS format:")
+            # Format the user input into a datetime object using the convert_user_time function
+            user_time = convert_user_input(user_time)
+            for package_id in range(1, 41):
+                package = hash_table.search(package_id)
+                package.update_status(user_time)
+                print(str(package))
+
+        elif user_input == "3":
+            print("The route mileage is: ")
+            print(truck1.mileage + truck2.mileage + truck3.mileage)
+            # Prints all the packages using the ending time of truck 3 to update all the statuses
+            # the packages.
+            print("Package ID, Address, City, State, Zipcode, Deadline, Weight (KILO), Notes, Status")
+            print("----------------------------------------------------------------------------------")
+            for package_id in range(1, 41):
+                package = hash_table.search(package_id)
+               # midnight = datetime.timedelta(hours = 24, minutes = 0, seconds=0)
+                package.update_status(truck3.time)
+                print(str(package) + " " + str(package.delivery_time))
+
+        elif user_input == "4":
+            print("Closing program...")
+            break
+
+        else:
+            print("Invalid choice. Please enter a valid option (1, 2, 3 or 4).")
