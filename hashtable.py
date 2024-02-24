@@ -1,4 +1,4 @@
-# HashTable class using chaining.
+# HashTable class using chaining. O(1) - low load volume with this program
 class ChainingHashTable:
     # Constructor with optional initial capacity parameter.
     # Assigns all buckets with an empty list.
@@ -63,51 +63,3 @@ class ChainingHashTable:
                 print(f"{key}, {item}")
 
 
-# Create package object
-class Package:
-    def __init__(self, package_id, address, city, state, zipcode, deadline, weight, notes, status):
-        self.package_id = package_id
-        self.address = address
-        self.city = city
-        self.state = state
-        self.zipcode = zipcode
-        self.deadline = deadline
-        self.weight = weight
-        self.notes = notes
-        self.status = status
-        self.loaded_time = None
-        self.delivery_time = None
-
-    def __str__(self):  # Overwrite
-        if self.status == "Delivered" and self.delivery_time:
-            return "%s, %s, %s, %s, %s, %s, %s, %s" % (self.package_id, self.address, self.city, self.zipcode,
-                                                       self.deadline, self.weight, self.status, self.delivery_time)
-        else:
-            return "%s, %s, %s, %s, %s, %s, %s" % (self.package_id, self.address, self.city, self.zipcode,
-                                                   self.deadline, self.weight, self.status)
-
-    # Updates the status of the package using the truck.time compared to the user input time.
-    def update_status(self, user_time):
-        if self.status == "AtHub" and self.loaded_time is not None:
-            if self.delivery_time <= user_time:
-                self.status = "En Route"
-        elif self.status == "En Route" and self.delivery_time is not None:
-            if self.delivery_time >= user_time:
-                self.status = "Delivered"
-
-
-class Truck:
-    def __init__(self, capacity, speed, load, packages, mileage, address, departure):
-        self.capacity = capacity
-        self.speed = speed
-        self.load = load
-        self.packages = packages
-        self.mileage = mileage
-        self.address = address
-        self.departure = departure
-        # Need this to track time throughout deliveries and use this to update package delivery times
-        self.time = departure
-
-    def __str__(self):  # overwrite
-        return "%s, %s, %s,  %s, %s, %s, %s," % (self.capacity, self.speed, self.load, self.packages, self.mileage,
-                                                 self.address, self.departure)
