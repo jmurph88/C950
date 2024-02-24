@@ -1,8 +1,14 @@
-# Jennifer Murphy Student ID: 001532028
-# Reference: zyBooks: Figure 7.8.2: Hash table using chaining
-# Reference: zyBooks: Figure 3.3.1: MakeChange greedy algorithm
-# Reference: Medium: Traveling Salesman Problem:
-# https://blog.devgenius.io/traveling-salesman-problem-nearest-neighbor-algorithm-solution-e78399d0ab0c
+# Jennifer Murphy
+# Student ID: 001532028
+
+# References:
+# zyBooks. Figure 7.8.2: Hash table using chaining
+# Alyssa Walker. Travelling Salesman Problem: Python, C++ Algorithm.
+#                   https://www.guru99.com/travelling-salesman-problem.html
+# Medium. Traveling Salesman Problem.
+#                   https://blog.devgenius.io/traveling-salesman-problem-nearest-neighbor-algorithm-solution-e78399d0ab0c
+# Reed, Mark. Python Programming and SQL The #1 Coding Course From Beginner to Advanced.
+#                   Independently Published, 2023.
 
 import csv
 import datetime

@@ -31,9 +31,14 @@ class Package:
     def update_status(self, convert_user_time):
         # Updates package 9's address when user input is greater than 10:20 AM.
         if self.package_id == 9 and convert_user_time > datetime.timedelta(hours=10, minutes=20):
-            self.address = "410 S State St"
-            self.zipcode = "84111"
-            self.status = "En Route"
+            if self.delivery_time is None:
+                self.address = "410 S State St"
+                self.zipcode = "84111"
+                self.status = "En Route"
+            else:
+                self.address = "410 S State St"
+                self.zipcode = "84111"
+                self.status = "Delivered"
         # Update the status of all packages based on user input
         elif self.loaded_time:
             if convert_user_time < self.departure_time:
